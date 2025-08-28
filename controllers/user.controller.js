@@ -1,43 +1,119 @@
-// user.controller.js
-
-const db = require("../db");
+const userService = require("../services/user.service");
+const isAlphabetic = require("../utils/validation.isAlphabetic");
 
 class UserController {
-  async createUser(req, res) {
-    const { name, surname } = req.body;
-    console.log(name, surname);
+  async createUser(req, res, next) {
+    const errors = [];
+    const { name, surname } = req.body || {};
+    try {
+      if (!name) errors.push("Name is required");
+      if (!surname) errors.push("Surname is required");
+      if (!isAlphabetic(name))
+        errors.push("Name can contain English letters only");
+      if (!isAlphabetic(surname))
+        errors.push("Surname can contain English letters only");
 
-    const newUser = await db.query(
-      "INSERT INTO users (name, surname) values ($1, $2) RETURNING *",
-      [name, surname]
-    );
-    res.json(newUser.rows[0]);
+      if (errors.length > 0) {
+        return res
+          .status(400)
+          .json({ message: "Validation failed", errors: errors });
+      }
+
+      const user = await userService.createUser(name, surname);
+      res.status(201).json(user);
+    } catch (err) {
+      return next(err);
+    }
   }
 
-  async getUsers(req, res) {
-    const users = await db.query("SELECT * FROM users");
-    res.json(users.rows);
+  async getUsers(req, res, next) {
+    try {
+      const users = await userService.getUsers();
+      if (!users[0]) {
+        return res
+          .status(404)
+          .json({ message: "Not found", errors: ["Users not found"] });
+      }
+
+      res.status(200).json(users);
+    } catch (err) {
+      return next(err);
+    }
   }
 
-  async getOneUser(req, res) {
+  async getOneUser(req, res, next) {
     const id = req.params.id;
-    const user = await db.query("SELECT * FROM users where id = $1", [id]);
-    res.json(user.rows[0]);
+    try {
+      if (!id || isNaN(id)) {
+        return res
+          .status(400)
+          .json({ message: "Validation failed", errors: ["Incorrect id"] });
+      }
+      const user = await userService.getOneUser(id);
+      if (!user) {
+        return res.status(404).json({
+          message: "Not found",
+          errors: [`User with id:${id} not found`],
+        });
+      }
+      res.status(200).json(user);
+    } catch (err) {
+      return next(err);
+    }
   }
 
-  async updateUser(req, res) {
+  async updateUser(req, res, next) {
+    const errors = [];
     const { id, name, surname } = req.body;
-    const user = await db.query(
-      "UPDATE users set name = $1, surname = $2 where id = $3 RETURNING *",
-      [name, surname, id]
-    );
-    res.json(user.rows[0]);
+    try {
+      if (!name) errors.push("Name is required");
+      if (!surname) errors.push("Surname is required");
+      if (!id) errors.push("Id is required");
+      if (isNaN(id)) errors.push("Id must be a number");
+
+      if (errors.length > 0) {
+        return res
+          .status(400)
+          .json({ message: "Validation failed", errors: errors });
+      }
+
+      const user = await userService.updateUser(id, name, surname);
+      res.status(200).json(user);
+    } catch (err) {
+      if (err.message === "Not found") {
+        return res.status(404).json({
+          message: err.message,
+          errors: [`User with id:${id} not found`],
+        });
+      }
+      return next(err);
+    }
   }
 
-  async deleteUser(req, res) {
+  async deleteUser(req, res, next) {
+    const errors = [];
     const id = req.params.id;
-    const user = await db.query("DELETE FROM users where id = $1", [id]);
-    res.json(user.rows[0]);
+    try {
+      if (!id) errors.push("Id is required");
+      if (isNaN(id)) errors.push("Id must be a number");
+
+      if (errors.length > 0) {
+        return res
+          .status(400)
+          .json({ message: "Validation failed", errors: errors });
+      }
+
+      await userService.deleteUser(id);
+      res.status(204).send();
+    } catch (err) {
+      if (err.message === "Not found") {
+        return res.status(404).json({
+          message: err.message,
+          errors: [`User with id:${id} not found`],
+        });
+      }
+      return next(err);
+    }
   }
 }
 
