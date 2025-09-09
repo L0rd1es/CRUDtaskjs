@@ -1,4 +1,4 @@
-// user.controller.js
+// user.service.js
 
 const userRepository = require("../repositories/user.repository");
 
@@ -7,24 +7,24 @@ class UserService {
     return await userRepository.createUser(name, surname);
   }
 
-  async getUsers() {
-    return await userRepository.getUsers();
+  async getAllUsers() {
+    return await userRepository.getAllUsers();
   }
 
-  async getOneUser(id) {
-    return await userRepository.getOneUser(id);
+  async getUserById(userId) {
+    return await userRepository.getUserById(userId);
   }
 
-  async updateUser(id, name, surname) {
-    const user = await userRepository.getOneUser(id);
+  async updateUser(userId, name, surname) {
+    const user = await userRepository.getUserById(userId);
     if (!user) throw new Error("Not found");
-    return await userRepository.updateUser(id, name, surname);
+    return await userRepository.updateUser(userId, name, surname);
   }
 
-  async deleteUser(id) {
-    const user = await userRepository.getOneUser(id);
+  async deleteUser(userId) {
+    const user = await userRepository.getUserById(userId);
     if (!user) throw new Error("Not found");
-    return await userRepository.deleteUser(id);
+    return await userRepository.deleteUser(userId);
   }
 }
 

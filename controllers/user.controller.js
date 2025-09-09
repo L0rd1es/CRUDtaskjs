@@ -26,9 +26,9 @@ class UserController {
     }
   }
 
-  async getUsers(req, res, next) {
+  async getAllUsers(req, res, next) {
     try {
-      const users = await userService.getUsers();
+      const users = await userService.getAllUsers();
       if (!users[0]) {
         return res
           .status(404)
@@ -41,19 +41,20 @@ class UserController {
     }
   }
 
-  async getOneUser(req, res, next) {
-    const id = req.params.id;
+  async getUserById(req, res, next) {
+    const userId = req.params.id;
     try {
-      if (!id || isNaN(id)) {
-        return res
-          .status(400)
-          .json({ message: "Validation failed", errors: ["Incorrect id"] });
+      if (!userId || isNaN(userId)) {
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: ["Incorrect user id"],
+        });
       }
-      const user = await userService.getOneUser(id);
+      const user = await userService.getUserById(userId);
       if (!user) {
         return res.status(404).json({
           message: "Not found",
-          errors: [`User with id:${id} not found`],
+          errors: [`User with id:${userId} not found`],
         });
       }
       res.status(200).json(user);
@@ -64,12 +65,12 @@ class UserController {
 
   async updateUser(req, res, next) {
     const errors = [];
-    const { id, name, surname } = req.body;
+    const { userId, name, surname } = req.body;
     try {
       if (!name) errors.push("Name is required");
       if (!surname) errors.push("Surname is required");
-      if (!id) errors.push("Id is required");
-      if (isNaN(id)) errors.push("Id must be a number");
+      if (!userId) errors.push("User ID is required");
+      if (isNaN(userId)) errors.push("user ID must be a number");
 
       if (errors.length > 0) {
         return res
@@ -77,13 +78,13 @@ class UserController {
           .json({ message: "Validation failed", errors: errors });
       }
 
-      const user = await userService.updateUser(id, name, surname);
+      const user = await userService.updateUser(userId, name, surname);
       res.status(200).json(user);
     } catch (err) {
       if (err.message === "Not found") {
         return res.status(404).json({
           message: err.message,
-          errors: [`User with id:${id} not found`],
+          errors: [`User with id:${userId} not found`],
         });
       }
       return next(err);
@@ -92,10 +93,10 @@ class UserController {
 
   async deleteUser(req, res, next) {
     const errors = [];
-    const id = req.params.id;
+    const userId = req.params.id;
     try {
-      if (!id) errors.push("Id is required");
-      if (isNaN(id)) errors.push("Id must be a number");
+      if (!userId) errors.push("user ID is required");
+      if (isNaN(userId)) errors.push("user ID must be a number");
 
       if (errors.length > 0) {
         return res
@@ -103,13 +104,13 @@ class UserController {
           .json({ message: "Validation failed", errors: errors });
       }
 
-      await userService.deleteUser(id);
-      res.status(204).send();
+      await userService.deleteUser(userId);
+      res.status(200).send();
     } catch (err) {
       if (err.message === "Not found") {
         return res.status(404).json({
           message: err.message,
-          errors: [`User with id:${id} not found`],
+          errors: [`User with id:${userId} not found`],
         });
       }
       return next(err);
