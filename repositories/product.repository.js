@@ -30,10 +30,7 @@ class ProductRepository {
   }
 
   async deleteProduct(productId) {
-    const product = await db.query("DELETE FROM products WHERE id = $1", [
-      productId,
-    ]);
-    return product.rows[0];
+    await db.query("DELETE FROM products WHERE id = $1", [productId]);
   }
 }
 
