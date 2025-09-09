@@ -6,9 +6,10 @@ class OrderController {
 
     const { userId, products } = req.body || {};
     try {
-      if (!userId) errors.push("User ID is required");
+      if (!userId) errors.push("User ID is required"); // what happens if userId is 0? test it and you will be surprised
+      // use products.length > 0 instead of products[0]. Also what happens if products is null/undefined?
       if (!products[0]) errors.push("At least one product ID is required");
-      if (isNaN(userId)) errors.push("User ID must be a number");
+      if (isNaN(userId)) errors.push("User ID must be a number"); // fun note: check how isNaN works if userId is null/undefined
 
       if (errors.length > 0) {
         return res
@@ -26,10 +27,10 @@ class OrderController {
   async getAllOrders(req, res, next) {
     try {
       const orders = await orderService.getAllOrders();
-      if (!orders[0]) {
+      if (!orders[0]) { // use lenght here as well. Check all other places where you use checks like this.
         return res
           .status(404)
-          .json({ message: "Not found", errors: ["Orders not found"] });
+          .json({ message: "Not found", errors: ["Orders not found"] }); // it's normal if orders are empty, no need in 404.
       }
 
       res.status(200).json(orders);
@@ -64,7 +65,7 @@ class OrderController {
     const errors = [];
     const { orderId, products } = req.body || {};
     try {
-      if (!products) errors.push("At least one product ID is required");
+      if (!products) errors.push("At least one product ID is required"); // same as above, check all other places where you use checks like this.
       if (!orderId) errors.push("Order ID is required");
       if (isNaN(orderId)) errors.push("Order ID must be a number");
 

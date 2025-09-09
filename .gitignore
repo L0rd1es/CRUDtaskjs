@@ -1,3 +1,6 @@
+# ingore this as well if you are not pinning versions of dependencies.
+package-lock.json
+
 # Logs
 logs
 *.log

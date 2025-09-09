@@ -22,7 +22,7 @@ class UserService {
   }
 
   async deleteUser(userId) {
-    const user = await userRepository.getUserById(userId);
+    const user = await userRepository.getUserById(userId); // no need to get it first. Try to delete and if not exists - not a big deal usually
     if (!user) throw new Error("Not found");
     return await userRepository.deleteUser(userId);
   }

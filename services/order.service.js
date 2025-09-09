@@ -1,4 +1,4 @@
-// order.service.js
+// order.service.js - useless row...
 
 const orderRepository = require("../repositories/order.repository");
 const productRepository = require("../repositories/product.repository");
@@ -6,6 +6,11 @@ const productRepository = require("../repositories/product.repository");
 class OrderService {
   async createOrder(userId, products) {
     //get current price for each product to save
+
+    /** After looking at db schema and code:
+     *  Why do you need to get the price for each product?
+     *  You have price at the 'products' table.
+    **/
     products.forEach(async (element) => {
       const product = await productRepository.getProductById(
         element.product_id
