@@ -1,3 +1,20 @@
 {
-  "cSpell.ignoreWords": ["recordset", "smth"]
+  "cSpell.ignoreWords": [
+    "Nuxt",
+    "PGPASSWORD",
+    "Sveltekit",
+    "Vite",
+    "appenders",
+    "dotenv",
+    "eslintcache",
+    "jscoverage",
+    "jspm",
+    "pids",
+    "recordset",
+    "smth",
+    "stylelintcache",
+    "vitepress",
+    "vuepress",
+    "wscript"
+  ]
 }

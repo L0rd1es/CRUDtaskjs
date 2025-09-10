@@ -1,5 +1,3 @@
-//product.router.js
-
 const Router = require("express");
 const ProductController = require("../controllers/product.controller");
 

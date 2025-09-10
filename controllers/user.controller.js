@@ -6,8 +6,8 @@ class UserController {
     const errors = [];
     const { name, surname } = req.body || {};
     try {
-      if (!name) errors.push("Name is required");
-      if (!surname) errors.push("Surname is required");
+      if (name == null) errors.push("Name is required");
+      if (surname == null) errors.push("Surname is required");
       if (!isAlphabetic(name))
         errors.push("Name can contain English letters only");
       if (!isAlphabetic(surname))
@@ -29,9 +29,9 @@ class UserController {
   async getAllUsers(req, res, next) {
     try {
       const users = await userService.getAllUsers();
-      if (!users[0]) {
+      if (users.length === 0) {
         return res
-          .status(404)
+          .status(200)
           .json({ message: "Not found", errors: ["Users not found"] });
       }
 
@@ -44,14 +44,14 @@ class UserController {
   async getUserById(req, res, next) {
     const userId = req.params.id;
     try {
-      if (!userId || isNaN(userId)) {
+      if (userId == null || isNaN(userId)) {
         return res.status(400).json({
           message: "Validation failed",
           errors: ["Incorrect user id"],
         });
       }
       const user = await userService.getUserById(userId);
-      if (!user) {
+      if (user == null) {
         return res.status(404).json({
           message: "Not found",
           errors: [`User with id:${userId} not found`],
@@ -67,9 +67,9 @@ class UserController {
     const errors = [];
     const { userId, name, surname } = req.body;
     try {
-      if (!name) errors.push("Name is required");
-      if (!surname) errors.push("Surname is required");
-      if (!userId) errors.push("User ID is required");
+      if (name == null) errors.push("Name is required");
+      if (surname == null) errors.push("Surname is required");
+      if (userId == null) errors.push("User ID is required");
       if (isNaN(userId)) errors.push("user ID must be a number");
 
       if (errors.length > 0) {
@@ -95,7 +95,7 @@ class UserController {
     const errors = [];
     const userId = req.params.id;
     try {
-      if (!userId) errors.push("user ID is required");
+      if (userId == null) errors.push("user ID is required");
       if (isNaN(userId)) errors.push("user ID must be a number");
 
       if (errors.length > 0) {
