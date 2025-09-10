@@ -1,5 +1,3 @@
-//user.router.js
-
 const Router = require("express");
 const userController = require("../controllers/user.controller");
 

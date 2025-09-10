@@ -1,5 +1,3 @@
-// user.service.js
-
 const userRepository = require("../repositories/user.repository");
 
 class UserService {
@@ -22,8 +20,6 @@ class UserService {
   }
 
   async deleteUser(userId) {
-    const user = await userRepository.getUserById(userId);
-    if (!user) throw new Error("Not found");
     return await userRepository.deleteUser(userId);
   }
 }
