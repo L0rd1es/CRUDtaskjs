@@ -1,5 +1,3 @@
-// product.controller.js
-
 const productRepository = require("../repositories/product.repository");
 
 class ProductService {
@@ -22,8 +20,6 @@ class ProductService {
   }
 
   async deleteProduct(productId) {
-    const product = await productRepository.getProductById(productId);
-    if (!product) throw new Error("Not found");
     return await productRepository.deleteProduct(productId);
   }
 }

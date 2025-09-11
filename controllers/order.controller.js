@@ -6,8 +6,9 @@ class OrderController {
 
     const { userId, products } = req.body || {};
     try {
-      if (!userId) errors.push("User ID is required");
-      if (!products[0]) errors.push("At least one product ID is required");
+      if (userId == null) errors.push("User ID is required");
+      if (products?.length < 1)
+        errors.push("At least one product ID is required");
       if (isNaN(userId)) errors.push("User ID must be a number");
 
       if (errors.length > 0) {
@@ -26,11 +27,6 @@ class OrderController {
   async getAllOrders(req, res, next) {
     try {
       const orders = await orderService.getAllOrders();
-      if (!orders[0]) {
-        return res
-          .status(404)
-          .json({ message: "Not found", errors: ["Orders not found"] });
-      }
 
       res.status(200).json(orders);
     } catch (err) {
@@ -41,14 +37,14 @@ class OrderController {
   async getOrderById(req, res, next) {
     const orderId = req.params.id;
     try {
-      if (!orderId || isNaN(orderId)) {
+      if (orderId == null || isNaN(orderId)) {
         return res.status(400).json({
           message: "Validation failed",
           errors: ["Incorrect order id"],
         });
       }
       const order = await orderService.getOrderById(orderId);
-      if (!order) {
+      if (order == null) {
         return res.status(404).json({
           message: "Not found",
           errors: [`Order with id:${orderId} not found`],
@@ -64,8 +60,9 @@ class OrderController {
     const errors = [];
     const { orderId, products } = req.body || {};
     try {
-      if (!products) errors.push("At least one product ID is required");
-      if (!orderId) errors.push("Order ID is required");
+      if (products?.length < 1)
+        errors.push("At least one product ID is required");
+      if (orderId == null) errors.push("Order ID is required");
       if (isNaN(orderId)) errors.push("Order ID must be a number");
 
       if (errors.length > 0) {
@@ -91,7 +88,7 @@ class OrderController {
     const errors = [];
     const orderId = req.params.id;
     try {
-      if (!orderId) errors.push("Order ID is required");
+      if (orderId == null) errors.push("Order ID is required");
       if (isNaN(orderId)) errors.push("Order ID must be a number");
 
       if (errors.length > 0) {

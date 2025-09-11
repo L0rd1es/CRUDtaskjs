@@ -24,13 +24,14 @@ class OrderRepository {
           input_data.order_id,
           product_row.product_id,
           product_row.quantity,
-          product_row.unit_price
+          products.price AS unit_price
         FROM input_data
         CROSS JOIN LATERAL jsonb_to_recordset(input_data.products_json) AS product_row(
           product_id bigint,
-          quantity int,
-          unit_price numeric(12,2)
+          quantity int
         )
+        JOIN products
+          ON products.id = product_row.product_id
         RETURNING product_id, quantity, unit_price
         `,
         [orderId, JSON.stringify(products)]
@@ -44,7 +45,7 @@ class OrderRepository {
       };
     } catch (err) {
       await client.query("ROLLBACK");
-      throw new Error("smth went wrong", err);
+      throw new Error(err);
     } finally {
       client.release();
     }
@@ -129,13 +130,14 @@ class OrderRepository {
           input_data.order_id,
           product_row.product_id,
           product_row.quantity,
-          product_row.unit_price
+          products.price AS unit_price
         FROM input_data
         CROSS JOIN LATERAL jsonb_to_recordset(input_data.products_json) AS product_row(
           product_id bigint,
-          quantity int,
-          unit_price numeric(12,2)
+          quantity int
         )
+        JOIN products
+          ON products.id = product_row.product_id
         RETURNING product_id, quantity, unit_price
         `,
         [orderId, JSON.stringify(products)]
@@ -149,7 +151,7 @@ class OrderRepository {
       };
     } catch (err) {
       await client.query("ROLLBACK");
-      throw new Error("smth went wrong", err);
+      throw new Error(err);
     } finally {
       client.release();
     }

@@ -1,5 +1,3 @@
-//index.js
-
 const express = require("express");
 const router = require("./routes/router");
 const errorHandler = require("./middleware/errorHandler");
