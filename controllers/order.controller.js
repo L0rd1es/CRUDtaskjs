@@ -7,7 +7,7 @@ class OrderController {
     const { userId, products } = req.body || {};
     try {
       if (userId == null) errors.push("User ID is required");
-      if (products.length === 0)
+      if (products?.length < 1)
         errors.push("At least one product ID is required");
       if (isNaN(userId)) errors.push("User ID must be a number");
 
@@ -27,11 +27,6 @@ class OrderController {
   async getAllOrders(req, res, next) {
     try {
       const orders = await orderService.getAllOrders();
-      if (orders.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "Not found", errors: ["Orders not found"] });
-      }
 
       res.status(200).json(orders);
     } catch (err) {
@@ -65,7 +60,8 @@ class OrderController {
     const errors = [];
     const { orderId, products } = req.body || {};
     try {
-      if (products == null) errors.push("At least one product ID is required");
+      if (products?.length < 1)
+        errors.push("At least one product ID is required");
       if (orderId == null) errors.push("Order ID is required");
       if (isNaN(orderId)) errors.push("Order ID must be a number");
 

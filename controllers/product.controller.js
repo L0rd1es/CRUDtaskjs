@@ -28,11 +28,6 @@ class ProductController {
   async getAllProducts(req, res, next) {
     try {
       const products = await productService.getAllProducts();
-      if (products.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "Not found", errors: ["Products not found"] });
-      }
 
       res.status(200).json(products);
     } catch (err) {

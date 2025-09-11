@@ -29,11 +29,6 @@ class UserController {
   async getAllUsers(req, res, next) {
     try {
       const users = await userService.getAllUsers();
-      if (users.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "Not found", errors: ["Users not found"] });
-      }
 
       res.status(200).json(users);
     } catch (err) {
