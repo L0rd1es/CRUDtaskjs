@@ -6,8 +6,8 @@ class ProductController {
     const errors = [];
     const { name, price } = req.body || {};
     try {
-      if (!name) errors.push("Product name is required");
-      if (!price) errors.push("Price is required");
+      if (name == null) errors.push("Product name is required");
+      if (price == null) errors.push("Price is required");
       if (!isAlphabetic(name))
         errors.push("Product name can contain English letters only");
       if (isNaN(price)) errors.push("Price must be a number");
@@ -28,11 +28,6 @@ class ProductController {
   async getAllProducts(req, res, next) {
     try {
       const products = await productService.getAllProducts();
-      if (!products[0]) {
-        return res
-          .status(404)
-          .json({ message: "Not found", errors: ["Products not found"] });
-      }
 
       res.status(200).json(products);
     } catch (err) {
@@ -43,14 +38,14 @@ class ProductController {
   async getProductById(req, res, next) {
     const productId = req.params.id;
     try {
-      if (!productId || isNaN(productId)) {
+      if (productId == null || isNaN(productId)) {
         return res.status(400).json({
           message: "Validation failed",
           errors: ["Incorrect product id"],
         });
       }
       const product = await productService.getProductById(productId);
-      if (!product) {
+      if (product == null) {
         return res.status(404).json({
           message: "Not found",
           errors: [`Product with id:${productId} not found`],
@@ -66,9 +61,9 @@ class ProductController {
     const errors = [];
     const { productId, name, price } = req.body;
     try {
-      if (!name) errors.push("Product name is required");
-      if (!price) errors.push("Price is required");
-      if (!productId) errors.push("Product ID is required");
+      if (name == null) errors.push("Product name is required");
+      if (price == null) errors.push("Price is required");
+      if (productId == null) errors.push("Product ID is required");
       if (isNaN(productId)) errors.push("Product ID must be a number");
 
       if (errors.length > 0) {
@@ -98,7 +93,7 @@ class ProductController {
     const errors = [];
     const productId = req.params.id;
     try {
-      if (!productId) errors.push("Product ID is required");
+      if (productId == null) errors.push("Product ID is required");
       if (isNaN(productId)) errors.push("Product ID must be a number");
 
       if (errors.length > 0) {

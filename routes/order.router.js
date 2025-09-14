@@ -1,5 +1,3 @@
-//order.router.js
-
 const Router = require("express");
 const OrderController = require("../controllers/order.controller");
 
