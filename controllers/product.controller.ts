@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import * as productService from "../services/product.service";
+import ProductService from "../services/product.service";
 import { isAlphabetic } from "../utils/validation.isAlphabetic";
 
 class ProductController {
   async createProduct(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
     const { name, price } = (req.body ?? {}) as {
-      name?: string;
-      price?: number;
+      name: string;
+      price: number;
     };
 
     try {
@@ -28,7 +28,7 @@ class ProductController {
         });
       }
 
-      const product = await productService.createProduct(name, price);
+      const product = await ProductService.createProduct(name, price);
       res.status(201).json(product);
     } catch (err) {
       return next(err);
@@ -37,7 +37,7 @@ class ProductController {
 
   async getAllProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await productService.getAllProducts();
+      const products = await ProductService.getAllProducts();
 
       res.status(200).json(products);
     } catch (err) {
@@ -61,7 +61,7 @@ class ProductController {
         });
       }
 
-      const product = await productService.getProductById(productId);
+      const product = await ProductService.getProductById(productId);
 
       if (product == null) {
         return next({
@@ -103,13 +103,13 @@ class ProductController {
         });
       }
 
-      const product = await productService.updateProduct(
+      const product = await ProductService.updateProduct(
         productId,
         name,
         price
       );
       res.status(200).json(product);
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Not found") {
         return next({
           type: "NOT_FOUND",
@@ -142,10 +142,10 @@ class ProductController {
         });
       }
 
-      await productService.deleteProduct(productId);
+      await ProductService.deleteProduct(productId);
 
       res.status(204).send();
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Not found") {
         return next({
           type: "NOT_FOUND",

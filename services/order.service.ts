@@ -1,4 +1,4 @@
-import * as OrderRepository from "../repositories/order.repository";
+import OrderRepository from "../repositories/order.repository";
 
 class OrderService {
   async createOrder(

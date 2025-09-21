@@ -49,7 +49,7 @@ class OrderRepository {
         orderId: orderId,
         products: orderItems.rows,
       };
-    } catch (err) {
+    } catch (err: any) {
       await client.query("ROLLBACK");
       throw new Error(err);
     } finally {
@@ -161,7 +161,7 @@ class OrderRepository {
         orderId: orderId,
         products: orderItems.rows,
       };
-    } catch (err) {
+    } catch (err: any) {
       await client.query("ROLLBACK");
       throw new Error(err);
     } finally {

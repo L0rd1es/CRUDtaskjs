@@ -1,4 +1,4 @@
-import * as UserRepository from "../repositories/user.repository";
+import UserRepository from "../repositories/user.repository";
 
 class UserService {
   async createUser(name: string, surname: string) {

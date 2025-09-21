@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import * as orderService from "../services/order.service";
+import OrderService from "../services/order.service";
 
 class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
     const { userId, products } = (req.body ?? {}) as {
-      userId?: number;
-      products?: {
+      userId: number;
+      products: {
         product_id: number;
         quantity: number;
       }[];
@@ -37,7 +37,7 @@ class OrderController {
         });
       }
 
-      const order = await orderService.createOrder(userId, products);
+      const order = await OrderService.createOrder(userId, products);
       res.status(201).json(order);
     } catch (err) {
       return next(err);
@@ -46,7 +46,7 @@ class OrderController {
 
   async getAllOrders(req: Request, res: Response, next: NextFunction) {
     try {
-      const orders = await orderService.getAllOrders();
+      const orders = await OrderService.getAllOrders();
 
       res.status(200).json(orders);
     } catch (err) {
@@ -70,7 +70,7 @@ class OrderController {
         });
       }
 
-      const order = await orderService.getOrderById(orderId);
+      const order = await OrderService.getOrderById(orderId);
 
       if (order == null) {
         return next({
@@ -88,8 +88,8 @@ class OrderController {
   async updateOrder(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
     const { orderId, products } = (req.body ?? {}) as {
-      orderId?: number;
-      products?: {
+      orderId: number;
+      products: {
         product_id: number;
         quantity: number;
       }[];
@@ -120,10 +120,10 @@ class OrderController {
         });
       }
 
-      const order = await orderService.updateOrder(orderId, products);
+      const order = await OrderService.updateOrder(orderId, products);
 
       res.status(200).json(order);
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Not found") {
         return next({
           type: "NOT_FOUND",
@@ -155,9 +155,9 @@ class OrderController {
         });
       }
 
-      await orderService.deleteOrder(orderId);
+      await OrderService.deleteOrder(orderId);
       res.status(204).send();
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Not found") {
         return next({
           type: "NOT_FOUND",

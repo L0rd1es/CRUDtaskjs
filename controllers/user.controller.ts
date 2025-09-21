@@ -6,8 +6,8 @@ class UserController {
   async createUser(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
     const { name, surname } = (req.body ?? {}) as {
-      name?: string;
-      surname?: string;
+      name: string;
+      surname: string;
     };
 
     try {
@@ -81,8 +81,8 @@ class UserController {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
     const { name, surname } = (req.body ?? {}) as {
-      name?: string;
-      surname?: string;
+      name: string;
+      surname: string;
     };
     const userId = Number(req.params.id);
 
@@ -112,7 +112,7 @@ class UserController {
       const user = await userService.updateUser(userId, name, surname);
 
       res.status(200).json(user);
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Not found") {
         return next({
           type: "NOT_FOUND",
@@ -148,7 +148,7 @@ class UserController {
       await userService.deleteUser(userId);
 
       res.status(204).send();
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Not found") {
         return next({
           type: "NOT_FOUND",
