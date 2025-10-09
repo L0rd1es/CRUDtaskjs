@@ -12,46 +12,37 @@ class OrderController {
       }[];
     };
 
-    try {
-      if (!Number.isInteger(userId) || userId <= 0) {
-        errors.push("User ID must be a positive integer");
-      }
-      if (!Array.isArray(products) || products.length === 0) {
-        errors.push("At least one product is required");
-      } else {
-        products.forEach((p, i) => {
-          if (!Number.isInteger(p.product_id) || p.product_id <= 0) {
-            errors.push(`products[${i}].product_id must be a positive integer`);
-          }
-          if (!Number.isInteger(p.quantity) || p.quantity <= 0) {
-            errors.push(`products[${i}].quantity must be a positive integer`);
-          }
-        });
-      }
-
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      const order = await OrderService.createOrder(userId, products);
-      res.status(201).json(order);
-    } catch (err) {
-      return next(err);
+    if (!Number.isInteger(userId) || userId <= 0) {
+      errors.push("User ID must be a positive integer");
     }
+    if (!Array.isArray(products) || products.length === 0) {
+      errors.push("At least one product is required");
+    } else {
+      products.forEach((p, i) => {
+        if (!Number.isInteger(p.product_id) || p.product_id <= 0) {
+          errors.push(`products[${i}].product_id must be a positive integer`);
+        }
+        if (!Number.isInteger(p.quantity) || p.quantity <= 0) {
+          errors.push(`products[${i}].quantity must be a positive integer`);
+        }
+      });
+    }
+
+    if (errors.length > 0) {
+      return next({
+        type: "VALIDATION",
+        message: "Validation failed",
+        details: errors,
+      });
+    }
+
+    const order = await OrderService.createOrder(userId, products);
+    res.status(201).json(order);
   }
 
   async getAllOrders(req: Request, res: Response, next: NextFunction) {
-    try {
-      const orders = await OrderService.getAllOrders();
-
-      res.status(200).json(orders);
-    } catch (err) {
-      return next(err);
-    }
+    const orders = await OrderService.getAllOrders();
+    res.status(200).json(orders);
   }
 
   async getOrderById(
@@ -59,30 +50,26 @@ class OrderController {
     res: Response,
     next: NextFunction
   ) {
-    try {
-      const orderId = Number(req.params.id);
+    const orderId = Number(req.params.id);
 
-      if (!Number.isInteger(orderId) || orderId <= 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: ["Order ID must be a positive integer"],
-        });
-      }
-
-      const order = await OrderService.getOrderById(orderId);
-
-      if (order == null) {
-        return next({
-          type: "NOT_FOUND",
-          message: `Order with id=${orderId} not found`,
-          details: [],
-        });
-      }
-      res.status(200).json(order);
-    } catch (err) {
-      return next(err);
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return next({
+        type: "VALIDATION",
+        message: "Validation failed",
+        details: ["Order ID must be a positive integer"],
+      });
     }
+
+    const order = await OrderService.getOrderById(orderId);
+
+    if (order == null) {
+      return next({
+        type: "NOT_FOUND",
+        message: `Order with id=${orderId} not found`,
+        details: [],
+      });
+    }
+    res.status(200).json(order);
   }
 
   async updateOrder(req: Request, res: Response, next: NextFunction) {

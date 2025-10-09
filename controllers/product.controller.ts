@@ -10,39 +10,30 @@ class ProductController {
       price: number;
     };
 
-    try {
-      if (name == null || name === "") {
-        errors.push("Name is required");
-      } else if (!isAlphabetic(name))
-        errors.push("Name can contain English letters only");
+    if (name == null || name === "") {
+      errors.push("Name is required");
+    } else if (!isAlphabetic(name))
+      errors.push("Name can contain English letters only");
 
-      if (!Number.isInteger(price * 100) || price <= 0) {
-        errors.push("Price must be a positive number");
-      }
-
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      const product = await ProductService.createProduct(name, price);
-      res.status(201).json(product);
-    } catch (err) {
-      return next(err);
+    if (!Number.isInteger(price * 100) || price <= 0) {
+      errors.push("Price must be a positive number");
     }
+
+    if (errors.length > 0) {
+      return next({
+        type: "VALIDATION",
+        message: "Validation failed",
+        details: errors,
+      });
+    }
+
+    const product = await ProductService.createProduct(name, price);
+    res.status(201).json(product);
   }
 
   async getAllProducts(req: Request, res: Response, next: NextFunction) {
-    try {
-      const products = await ProductService.getAllProducts();
-
-      res.status(200).json(products);
-    } catch (err) {
-      return next(err);
-    }
+    const products = await ProductService.getAllProducts();
+    res.status(200).json(products);
   }
 
   async getProductById(
@@ -50,31 +41,27 @@ class ProductController {
     res: Response,
     next: NextFunction
   ) {
-    try {
-      const productId = Number(req.params.id);
+    const productId = Number(req.params.id);
 
-      if (!Number.isInteger(productId) || productId <= 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: ["Product ID must be a positive integer"],
-        });
-      }
-
-      const product = await ProductService.getProductById(productId);
-
-      if (product == null) {
-        return next({
-          type: "NOT_FOUND",
-          message: `Product with id=${productId} not found`,
-          details: [],
-        });
-      }
-
-      res.status(200).json(product);
-    } catch (err) {
-      return next(err);
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return next({
+        type: "VALIDATION",
+        message: "Validation failed",
+        details: ["Product ID must be a positive integer"],
+      });
     }
+
+    const product = await ProductService.getProductById(productId);
+
+    if (product == null) {
+      return next({
+        type: "NOT_FOUND",
+        message: `Product with id=${productId} not found`,
+        details: [],
+      });
+    }
+
+    res.status(200).json(product);
   }
 
   async updateProduct(req: Request, res: Response, next: NextFunction) {

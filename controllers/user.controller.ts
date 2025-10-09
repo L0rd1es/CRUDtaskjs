@@ -10,40 +10,31 @@ class UserController {
       surname: string;
     };
 
-    try {
-      if (name == null || name === "") {
-        errors.push("Name is required");
-      } else if (!isAlphabetic(name))
-        errors.push("Name can contain English letters only");
+    if (name == null || name === "") {
+      errors.push("Name is required");
+    } else if (!isAlphabetic(name))
+      errors.push("Name can contain English letters only");
 
-      if (surname == null || surname === "") {
-        errors.push("Surname is required");
-      } else if (!isAlphabetic(surname))
-        errors.push("Surname can contain English letters only");
+    if (surname == null || surname === "") {
+      errors.push("Surname is required");
+    } else if (!isAlphabetic(surname))
+      errors.push("Surname can contain English letters only");
 
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      const user = await userService.createUser(name, surname);
-      res.status(201).json(user);
-    } catch (err) {
-      return next(err);
+    if (errors.length > 0) {
+      return next({
+        type: "VALIDATION",
+        message: "Validation failed",
+        details: errors,
+      });
     }
+
+    const user = await userService.createUser(name, surname);
+    res.status(201).json(user);
   }
 
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
-    try {
-      const users = await userService.getAllUsers();
-
-      res.status(200).json(users);
-    } catch (err) {
-      return next(err);
-    }
+    const users = await userService.getAllUsers();
+    res.status(200).json(users);
   }
 
   async getUserById(
@@ -51,31 +42,27 @@ class UserController {
     res: Response,
     next: NextFunction
   ) {
-    try {
-      const userId = Number(req.params.id);
+    const userId = Number(req.params.id);
 
-      if (!Number.isInteger(userId) || userId <= 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: ["User ID must be a positive integer"],
-        });
-      }
-
-      const user = await userService.getUserById(userId);
-
-      if (user == null) {
-        return next({
-          type: "NOT_FOUND",
-          message: `User with id=${userId} not found`,
-          details: [],
-        });
-      }
-
-      res.status(200).json(user);
-    } catch (err) {
-      return next(err);
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return next({
+        type: "VALIDATION",
+        message: "Validation failed",
+        details: ["User ID must be a positive integer"],
+      });
     }
+
+    const user = await userService.getUserById(userId);
+
+    if (user == null) {
+      return next({
+        type: "NOT_FOUND",
+        message: `User with id=${userId} not found`,
+        details: [],
+      });
+    }
+
+    res.status(200).json(user);
   }
 
   async updateUser(req: Request, res: Response, next: NextFunction) {
