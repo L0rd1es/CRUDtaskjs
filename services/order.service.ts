@@ -27,9 +27,6 @@ class OrderService {
       quantity: number;
     }[]
   ) {
-    const order = await OrderRepository.getOrderById(orderId);
-    if (!order) throw new Error("Not found");
-
     return await OrderRepository.updateOrder(orderId, products);
   }
 

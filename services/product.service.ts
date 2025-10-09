@@ -14,9 +14,6 @@ class ProductService {
   }
 
   async updateProduct(productId: number, name: string, price: number) {
-    const product = await ProductRepository.getProductById(productId);
-    if (!product) throw new Error("Not found");
-
     return await ProductRepository.updateProduct(productId, name, price);
   }
 

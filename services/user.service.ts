@@ -14,8 +14,6 @@ class UserService {
   }
 
   async updateUser(userId: number, name: string, surname: string) {
-    const user = await UserRepository.getUserById(userId);
-    if (!user) throw new Error("Not found");
     return await UserRepository.updateUser(userId, name, surname);
   }
 

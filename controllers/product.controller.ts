@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import ProductService from "../services/product.service";
 import { isAlphabetic } from "../utils/validation.isAlphabetic";
+import { AppError } from "../errors/appError";
 
 class ProductController {
   async createProduct(req: Request, res: Response, next: NextFunction) {
@@ -20,11 +21,7 @@ class ProductController {
     }
 
     if (errors.length > 0) {
-      return next({
-        type: "VALIDATION",
-        message: "Validation failed",
-        details: errors,
-      });
+      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
     }
 
     const product = await ProductService.createProduct(name, price);
@@ -44,21 +41,21 @@ class ProductController {
     const productId = Number(req.params.id);
 
     if (!Number.isInteger(productId) || productId <= 0) {
-      return next({
-        type: "VALIDATION",
-        message: "Validation failed",
-        details: ["Product ID must be a positive integer"],
-      });
+      throw new AppError(
+        "VALIDATION",
+        `Product ID must be a positive integer`,
+        400
+      );
     }
 
     const product = await ProductService.getProductById(productId);
 
     if (product == null) {
-      return next({
-        type: "NOT_FOUND",
-        message: `Product with id=${productId} not found`,
-        details: [],
-      });
+      throw new AppError(
+        "NOT_FOUND",
+        `Product ${req.params.id} not found`,
+        404
+      );
     }
 
     res.status(200).json(product);
@@ -71,41 +68,22 @@ class ProductController {
     const price = Number(req.body.price);
     const name = req.body.name;
 
-    try {
-      if (name == null || name === "") {
-        errors.push("Product name is required");
-      }
-      if (!Number.isInteger(price * 100) || price <= 0) {
-        errors.push("Price must be a positive number");
-      }
-      if (!Number.isInteger(productId) || productId <= 0) {
-        errors.push("Product ID must be a positive integer");
-      }
-
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      const product = await ProductService.updateProduct(
-        productId,
-        name,
-        price
-      );
-      res.status(200).json(product);
-    } catch (err: any) {
-      if (err.message === "Not found") {
-        return next({
-          type: "NOT_FOUND",
-          message: `Product with id=${productId} not found`,
-          details: [],
-        });
-      }
-      return next(err);
+    if (name == null || name === "") {
+      errors.push("Product name is required");
     }
+    if (!Number.isInteger(price * 100) || price <= 0) {
+      errors.push("Price must be a positive number");
+    }
+    if (!Number.isInteger(productId) || productId <= 0) {
+      errors.push("Product ID must be a positive integer");
+    }
+
+    if (errors.length > 0) {
+      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+    }
+
+    const product = await ProductService.updateProduct(productId, name, price);
+    res.status(200).json(product);
   }
 
   async deleteProduct(
@@ -116,32 +94,17 @@ class ProductController {
     const errors: string[] = [];
     const productId = Number(req.params.id);
 
-    try {
-      if (!Number.isInteger(productId) || productId <= 0) {
-        errors.push("Product ID must be a positive integer");
-      }
-
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      await ProductService.deleteProduct(productId);
-
-      res.status(204).send();
-    } catch (err: any) {
-      if (err.message === "Not found") {
-        return next({
-          type: "NOT_FOUND",
-          message: `Product with id=${productId} not found`,
-          details: [],
-        });
-      }
-      return next(err);
+    if (!Number.isInteger(productId) || productId <= 0) {
+      errors.push("Product ID must be a positive integer");
     }
+
+    if (errors.length > 0) {
+      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+    }
+
+    await ProductService.deleteProduct(productId);
+
+    res.status(204).send();
   }
 }
 

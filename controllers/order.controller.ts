@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import OrderService from "../services/order.service";
+import { AppError } from "../errors/appError";
 
 class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -29,11 +30,7 @@ class OrderController {
     }
 
     if (errors.length > 0) {
-      return next({
-        type: "VALIDATION",
-        message: "Validation failed",
-        details: errors,
-      });
+      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
     }
 
     const order = await OrderService.createOrder(userId, products);
@@ -53,22 +50,19 @@ class OrderController {
     const orderId = Number(req.params.id);
 
     if (!Number.isInteger(orderId) || orderId <= 0) {
-      return next({
-        type: "VALIDATION",
-        message: "Validation failed",
-        details: ["Order ID must be a positive integer"],
-      });
+      throw new AppError(
+        "VALIDATION",
+        `Order ID must be a positive integer`,
+        400
+      );
     }
 
     const order = await OrderService.getOrderById(orderId);
 
     if (order == null) {
-      return next({
-        type: "NOT_FOUND",
-        message: `Order with id=${orderId} not found`,
-        details: [],
-      });
+      throw new AppError("NOT_FOUND", `Order ${req.params.id} not found`, 404);
     }
+
     res.status(200).json(order);
   }
 
@@ -82,44 +76,29 @@ class OrderController {
       }[];
     };
 
-    try {
-      if (!Number.isInteger(orderId) || orderId <= 0) {
-        errors.push("Order ID must be a positive integer");
-      }
-      if (!Array.isArray(products) || products.length === 0) {
-        errors.push("At least one product is required");
-      } else {
-        products.forEach((p, i) => {
-          if (!Number.isInteger(p.product_id) || p.product_id <= 0) {
-            errors.push(`products[${i}].product_id must be a positive integer`);
-          }
-          if (!Number.isInteger(p.quantity) || p.quantity <= 0) {
-            errors.push(`products[${i}].quantity must be a positive integer`);
-          }
-        });
-      }
-
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      const order = await OrderService.updateOrder(orderId, products);
-
-      res.status(200).json(order);
-    } catch (err: any) {
-      if (err.message === "Not found") {
-        return next({
-          type: "NOT_FOUND",
-          message: `Order with id=${orderId} not found`,
-          details: [],
-        });
-      }
-      return next(err);
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      errors.push("Order ID must be a positive integer");
     }
+    if (!Array.isArray(products) || products.length === 0) {
+      errors.push("At least one product is required");
+    } else {
+      products.forEach((p, i) => {
+        if (!Number.isInteger(p.product_id) || p.product_id <= 0) {
+          errors.push(`products[${i}].product_id must be a positive integer`);
+        }
+        if (!Number.isInteger(p.quantity) || p.quantity <= 0) {
+          errors.push(`products[${i}].quantity must be a positive integer`);
+        }
+      });
+    }
+
+    if (errors.length > 0) {
+      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+    }
+
+    const order = await OrderService.updateOrder(orderId, products);
+
+    res.status(200).json(order);
   }
 
   async deleteOrder(
@@ -129,31 +108,17 @@ class OrderController {
   ) {
     const errors: string[] = [];
     const orderId = Number(req.params.id);
-    try {
-      if (!Number.isInteger(orderId) || orderId <= 0) {
-        errors.push("Order ID must be a positive integer");
-      }
 
-      if (errors.length > 0) {
-        return next({
-          type: "VALIDATION",
-          message: "Validation failed",
-          details: errors,
-        });
-      }
-
-      await OrderService.deleteOrder(orderId);
-      res.status(204).send();
-    } catch (err: any) {
-      if (err.message === "Not found") {
-        return next({
-          type: "NOT_FOUND",
-          message: `Order with id=${orderId} not found`,
-          details: [],
-        });
-      }
-      return next(err);
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      errors.push("Order ID must be a positive integer");
     }
+
+    if (errors.length > 0) {
+      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+    }
+
+    await OrderService.deleteOrder(orderId);
+    res.status(204).send();
   }
 }
 
