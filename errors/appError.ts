@@ -1,4 +1,9 @@
-type AppErrorType = "VALIDATION" | "NOT_FOUND" | "FORBIDDEN" | "UNAUTHORIZED";
+export enum AppErrorType {
+  VALIDATION = "VALIDATION",
+  NOT_FOUND = "NOT_FOUND",
+  FORBIDDEN = "FORBIDDEN",
+  UNAUTHORIZED = "UNAUTHORIZED",
+}
 
 export class AppError extends Error {
   constructor(

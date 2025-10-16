@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import userService from "../services/user.service";
 import { isAlphabetic } from "../utils/validation.isAlphabetic";
-import { AppError } from "../errors/appError";
+import { AppError, AppErrorType } from "../errors/appError";
 
 class UserController {
   async createUser(req: Request, res: Response, next: NextFunction) {
@@ -22,7 +22,11 @@ class UserController {
       errors.push("Surname can contain English letters only");
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     const user = await userService.createUser(name, surname);
@@ -43,7 +47,7 @@ class UserController {
 
     if (!Number.isInteger(userId) || userId <= 0) {
       throw new AppError(
-        "VALIDATION",
+        AppErrorType.VALIDATION,
         `User ID must be a positive integer`,
         400
       );
@@ -52,7 +56,11 @@ class UserController {
     const user = await userService.getUserById(userId);
 
     if (user == null) {
-      throw new AppError("NOT_FOUND", `User ${req.params.id} not found`, 404);
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `User ${req.params.id} not found`,
+        404
+      );
     }
 
     res.status(200).json(user);
@@ -81,7 +89,11 @@ class UserController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     const user = await userService.updateUser(userId, name, surname);
@@ -102,7 +114,11 @@ class UserController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     await userService.deleteUser(userId);

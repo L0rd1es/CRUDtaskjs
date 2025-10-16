@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import ProductService from "../services/product.service";
 import { isAlphabetic } from "../utils/validation.isAlphabetic";
-import { AppError } from "../errors/appError";
+import { AppError, AppErrorType } from "../errors/appError";
 
 class ProductController {
   async createProduct(req: Request, res: Response, next: NextFunction) {
@@ -21,7 +21,11 @@ class ProductController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     const product = await ProductService.createProduct(name, price);
@@ -42,7 +46,7 @@ class ProductController {
 
     if (!Number.isInteger(productId) || productId <= 0) {
       throw new AppError(
-        "VALIDATION",
+        AppErrorType.VALIDATION,
         `Product ID must be a positive integer`,
         400
       );
@@ -52,7 +56,7 @@ class ProductController {
 
     if (product == null) {
       throw new AppError(
-        "NOT_FOUND",
+        AppErrorType.NOT_FOUND,
         `Product ${req.params.id} not found`,
         404
       );
@@ -79,7 +83,11 @@ class ProductController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     const product = await ProductService.updateProduct(productId, name, price);
@@ -99,7 +107,11 @@ class ProductController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     await ProductService.deleteProduct(productId);

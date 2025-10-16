@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import OrderService from "../services/order.service";
-import { AppError } from "../errors/appError";
+import { AppError, AppErrorType } from "../errors/appError";
 
 class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -30,7 +30,11 @@ class OrderController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     const order = await OrderService.createOrder(userId, products);
@@ -51,7 +55,7 @@ class OrderController {
 
     if (!Number.isInteger(orderId) || orderId <= 0) {
       throw new AppError(
-        "VALIDATION",
+        AppErrorType.VALIDATION,
         `Order ID must be a positive integer`,
         400
       );
@@ -60,7 +64,11 @@ class OrderController {
     const order = await OrderService.getOrderById(orderId);
 
     if (order == null) {
-      throw new AppError("NOT_FOUND", `Order ${req.params.id} not found`, 404);
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `Order ${req.params.id} not found`,
+        404
+      );
     }
 
     res.status(200).json(order);
@@ -93,7 +101,11 @@ class OrderController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     const order = await OrderService.updateOrder(orderId, products);
@@ -114,7 +126,11 @@ class OrderController {
     }
 
     if (errors.length > 0) {
-      throw new AppError("VALIDATION", `Validation failed: ${errors}`, 400);
+      throw new AppError(
+        AppErrorType.VALIDATION,
+        `Validation failed: ${errors}`,
+        400
+      );
     }
 
     await OrderService.deleteOrder(orderId);
