@@ -1,7 +1,13 @@
-const db = require("../db");
+import db from "../db";
 
 class OrderRepository {
-  async createOrder(userId, products) {
+  async createOrder(
+    userId: number,
+    products: {
+      product_id: number;
+      quantity: number;
+    }[]
+  ) {
     const client = await db.connect();
     try {
       await client.query("BEGIN");
@@ -43,7 +49,7 @@ class OrderRepository {
         orderId: orderId,
         products: orderItems.rows,
       };
-    } catch (err) {
+    } catch (err: any) {
       await client.query("ROLLBACK");
       throw new Error(err);
     } finally {
@@ -79,7 +85,7 @@ class OrderRepository {
     return orders.rows;
   }
 
-  async getOrderById(orderId) {
+  async getOrderById(orderId: number) {
     const order = await db.query(
       `
       SELECT
@@ -108,7 +114,13 @@ class OrderRepository {
     return order.rows[0];
   }
 
-  async updateOrder(orderId, products) {
+  async updateOrder(
+    orderId: number,
+    products: {
+      product_id: number;
+      quantity: number;
+    }[]
+  ) {
     const client = await db.connect();
 
     try {
@@ -149,7 +161,7 @@ class OrderRepository {
         orderId: orderId,
         products: orderItems.rows,
       };
-    } catch (err) {
+    } catch (err: any) {
       await client.query("ROLLBACK");
       throw new Error(err);
     } finally {
@@ -157,9 +169,9 @@ class OrderRepository {
     }
   }
 
-  async deleteOrder(orderId) {
+  async deleteOrder(orderId: number) {
     await db.query("DELETE FROM orders WHERE id = $1", [orderId]);
   }
 }
 
-module.exports = new OrderRepository();
+export default new OrderRepository();
