@@ -1,17 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import OrderService from "../services/order.service";
 import { AppError, AppErrorType } from "../errors/appError";
+import { orderDTO } from "../DTO/order.dto";
 
 class OrderController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
-    const { userId, products } = (req.body ?? {}) as {
-      userId: number;
-      products: {
-        product_id: number;
-        quantity: number;
-      }[];
-    };
+    const { userId, products } = req.body as orderDTO;
 
     if (!Number.isInteger(userId) || userId <= 0) {
       errors.push("User ID must be a positive integer");
@@ -37,7 +32,7 @@ class OrderController {
       );
     }
 
-    const order = await OrderService.createOrder(userId, products);
+    const order = await OrderService.createOrder(req.body as orderDTO);
     res.status(201).json(order);
   }
 
@@ -76,13 +71,8 @@ class OrderController {
 
   async updateOrder(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
-    const { orderId, products } = (req.body ?? {}) as {
-      orderId: number;
-      products: {
-        product_id: number;
-        quantity: number;
-      }[];
-    };
+    const orderId = Number(req.params.id);
+    const { products } = req.body as orderDTO;
 
     if (!Number.isInteger(orderId) || orderId <= 0) {
       errors.push("Order ID must be a positive integer");
@@ -108,7 +98,15 @@ class OrderController {
       );
     }
 
-    const order = await OrderService.updateOrder(orderId, products);
+    if ((await OrderService.getOrderById(orderId)) == null) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `Order with Id:${req.params.id} not found`,
+        404
+      );
+    }
+
+    const order = await OrderService.updateOrder(orderId, req.body as orderDTO);
 
     res.status(200).json(order);
   }
@@ -130,6 +128,14 @@ class OrderController {
         AppErrorType.VALIDATION,
         `Validation failed: ${errors}`,
         400
+      );
+    }
+
+    if ((await OrderService.getOrderById(orderId)) == null) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `Order with Id:${req.params.id} not found`,
+        404
       );
     }
 

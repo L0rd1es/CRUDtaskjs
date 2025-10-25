@@ -1,10 +1,11 @@
 import db from "../db";
+import { userDTO } from "../DTO/user.dto";
 
 class UserRepository {
-  async createUser(name: string, surname: string) {
+  async createUser(dto: userDTO) {
     const newUser = await db.query(
       "INSERT INTO users (name, surname) VALUES ($1, $2) RETURNING *",
-      [name, surname]
+      [dto.name, dto.surname]
     );
     return newUser.rows[0];
   }
@@ -19,10 +20,10 @@ class UserRepository {
     return user.rows[0];
   }
 
-  async updateUser(userId: number, name: string, surname: string) {
+  async updateUser(userId: number, dto: userDTO) {
     const user = await db.query(
       "UPDATE users SET name = $1, surname = $2 WHERE id = $3 RETURNING *",
-      [name, surname, userId]
+      [dto.name, dto.surname, userId]
     );
     return user.rows[0];
   }

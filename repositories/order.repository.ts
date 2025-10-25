@@ -1,20 +1,15 @@
 import db from "../db";
+import { orderDTO } from "../DTO/order.dto";
 
 class OrderRepository {
-  async createOrder(
-    userId: number,
-    products: {
-      product_id: number;
-      quantity: number;
-    }[]
-  ) {
+  async createOrder(dto: orderDTO) {
     const client = await db.connect();
     try {
       await client.query("BEGIN");
 
       const order = await client.query(
         "INSERT INTO orders (user_id) VALUES($1) RETURNING *",
-        [userId]
+        [dto.userId]
       );
       const orderId = order.rows[0].id;
 
@@ -40,7 +35,7 @@ class OrderRepository {
           ON products.id = product_row.product_id
         RETURNING product_id, quantity, unit_price
         `,
-        [orderId, JSON.stringify(products)]
+        [orderId, JSON.stringify(dto.products)]
       );
 
       await client.query("COMMIT");
@@ -114,13 +109,7 @@ class OrderRepository {
     return order.rows[0];
   }
 
-  async updateOrder(
-    orderId: number,
-    products: {
-      product_id: number;
-      quantity: number;
-    }[]
-  ) {
+  async updateOrder(orderId: number, dto: orderDTO) {
     const client = await db.connect();
 
     try {
@@ -152,7 +141,7 @@ class OrderRepository {
           ON products.id = product_row.product_id
         RETURNING product_id, quantity, unit_price
         `,
-        [orderId, JSON.stringify(products)]
+        [orderId, JSON.stringify(dto.products)]
       );
 
       await client.query("COMMIT");

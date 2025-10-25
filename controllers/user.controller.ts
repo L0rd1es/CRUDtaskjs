@@ -2,14 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import userService from "../services/user.service";
 import { isAlphabetic } from "../utils/validation.isAlphabetic";
 import { AppError, AppErrorType } from "../errors/appError";
+import { userDTO } from "../DTO/user.dto";
 
 class UserController {
   async createUser(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
-    const { name, surname } = (req.body ?? {}) as {
-      name: string;
-      surname: string;
-    };
+    const { name, surname } = req.body as userDTO;
 
     if (name == null || name === "") {
       errors.push("Name is required");
@@ -29,7 +27,7 @@ class UserController {
       );
     }
 
-    const user = await userService.createUser(name, surname);
+    const user = await userService.createUser(req.body as userDTO);
     res.status(201).json(user);
   }
 
@@ -58,7 +56,7 @@ class UserController {
     if (user == null) {
       throw new AppError(
         AppErrorType.NOT_FOUND,
-        `User ${req.params.id} not found`,
+        `User with Id:${req.params.id} not found`,
         404
       );
     }
@@ -68,22 +66,22 @@ class UserController {
 
   async updateUser(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
-    const { name, surname } = (req.body ?? {}) as {
-      name: string;
-      surname: string;
-    };
+
+    const { name, surname } = req.body as userDTO;
     const userId = Number(req.params.id);
 
     if (name == null || name === "") {
       errors.push("Name is required");
-    } else if (!isAlphabetic(name))
+    }
+    if (!isAlphabetic(name)) {
       errors.push("Name can contain English letters only");
-
+    }
     if (surname == null || surname === "") {
       errors.push("Surname is required");
-    } else if (!isAlphabetic(surname))
+    }
+    if (!isAlphabetic(surname)) {
       errors.push("Surname can contain English letters only");
-
+    }
     if (!Number.isInteger(userId) || userId <= 0) {
       errors.push("User ID must be a positive integer");
     }
@@ -96,7 +94,15 @@ class UserController {
       );
     }
 
-    const user = await userService.updateUser(userId, name, surname);
+    if ((await userService.getUserById(userId)) == null) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `User with Id:${req.params.id} not found`,
+        404
+      );
+    }
+
+    const user = await userService.updateUser(userId, req.body as userDTO);
 
     res.status(200).json(user);
   }
@@ -118,6 +124,14 @@ class UserController {
         AppErrorType.VALIDATION,
         `Validation failed: ${errors}`,
         400
+      );
+    }
+
+    if ((await userService.getUserById(userId)) == null) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `User with Id:${req.params.id} not found`,
+        404
       );
     }
 

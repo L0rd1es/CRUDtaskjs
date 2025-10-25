@@ -1,14 +1,9 @@
+import { orderDTO } from "../DTO/order.dto";
 import OrderRepository from "../repositories/order.repository";
 
 class OrderService {
-  async createOrder(
-    userId: number,
-    products: {
-      product_id: number;
-      quantity: number;
-    }[]
-  ) {
-    const order = await OrderRepository.createOrder(userId, products);
+  async createOrder(dto: orderDTO) {
+    const order = await OrderRepository.createOrder(dto);
     return order;
   }
 
@@ -20,14 +15,8 @@ class OrderService {
     return await OrderRepository.getOrderById(orderId);
   }
 
-  async updateOrder(
-    orderId: number,
-    products: {
-      product_id: number;
-      quantity: number;
-    }[]
-  ) {
-    return await OrderRepository.updateOrder(orderId, products);
+  async updateOrder(orderId: number, dto: orderDTO) {
+    return await OrderRepository.updateOrder(orderId, dto);
   }
 
   async deleteOrder(orderId: number) {

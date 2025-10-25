@@ -12,7 +12,7 @@ router.get("/", (req, res, next) =>
 router.get("/:id", (req, res, next) =>
   OrderController.getOrderById(req, res, next)
 );
-router.put("/", (req, res, next) =>
+router.put("/:id", (req, res, next) =>
   OrderController.updateOrder(req, res, next)
 );
 router.delete("/:id", (req, res, next) =>

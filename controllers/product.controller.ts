@@ -2,14 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import ProductService from "../services/product.service";
 import { isAlphabetic } from "../utils/validation.isAlphabetic";
 import { AppError, AppErrorType } from "../errors/appError";
+import { productDTO } from "../DTO/product.dto";
 
 class ProductController {
   async createProduct(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
-    const { name, price } = (req.body ?? {}) as {
-      name: string;
-      price: number;
-    };
+    const { name, price } = req.body as productDTO;
 
     if (name == null || name === "") {
       errors.push("Name is required");
@@ -28,7 +26,7 @@ class ProductController {
       );
     }
 
-    const product = await ProductService.createProduct(name, price);
+    const product = await ProductService.createProduct(req.body as productDTO);
     res.status(201).json(product);
   }
 
@@ -57,7 +55,7 @@ class ProductController {
     if (product == null) {
       throw new AppError(
         AppErrorType.NOT_FOUND,
-        `Product ${req.params.id} not found`,
+        `Product with Id:${req.params.id} not found`,
         404
       );
     }
@@ -68,9 +66,8 @@ class ProductController {
   async updateProduct(req: Request, res: Response, next: NextFunction) {
     const errors: string[] = [];
 
-    const productId = Number(req.body.productId);
-    const price = Number(req.body.price);
-    const name = req.body.name;
+    const productId = Number(req.params.id);
+    const { name, price } = req.body as productDTO;
 
     if (name == null || name === "") {
       errors.push("Product name is required");
@@ -90,7 +87,18 @@ class ProductController {
       );
     }
 
-    const product = await ProductService.updateProduct(productId, name, price);
+    if ((await ProductService.getProductById(productId)) == null) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `Product with Id:${req.params.id} not found`,
+        404
+      );
+    }
+
+    const product = await ProductService.updateProduct(
+      productId,
+      req.body as productDTO
+    );
     res.status(200).json(product);
   }
 
@@ -111,6 +119,14 @@ class ProductController {
         AppErrorType.VALIDATION,
         `Validation failed: ${errors}`,
         400
+      );
+    }
+
+    if ((await ProductService.getProductById(productId)) == null) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `Product with Id:${req.params.id} not found`,
+        404
       );
     }
 

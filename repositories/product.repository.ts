@@ -1,10 +1,11 @@
 import db from "../db";
+import { productDTO } from "../DTO/product.dto";
 
 class ProductRepository {
-  async createProduct(name: string, price: number) {
+  async createProduct(dto: productDTO) {
     const newProduct = await db.query(
       "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING *",
-      [name, price]
+      [dto.name, dto.price]
     );
     return newProduct.rows[0];
   }
@@ -21,10 +22,10 @@ class ProductRepository {
     return product.rows[0];
   }
 
-  async updateProduct(productId: number, name: string, price: number) {
+  async updateProduct(productId: number, dto: productDTO) {
     const product = await db.query(
       "UPDATE products SET name = $1, price = $2 WHERE id = $3 RETURNING *",
-      [name, price, productId]
+      [dto.name, dto.price, productId]
     );
     return product.rows[0];
   }
