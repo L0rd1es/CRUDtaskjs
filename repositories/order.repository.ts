@@ -101,6 +101,9 @@ class OrderRepository {
     return order.rows[0];
   }
 
+  //TODO update вместо delete+insert, переписать самому sql запрос,
+  //TODO update вместо delete+insert, переписать самому sql запрос,
+
   async updateOrder(orderId: number, dto: orderDTO) {
     const client = await db.connect();
 
