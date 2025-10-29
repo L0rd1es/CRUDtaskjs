@@ -1,7 +1,7 @@
 export interface orderDTO {
   userId: number;
   products: {
-    product_id: number;
+    productId: number;
     quantity: number;
   }[];
 }

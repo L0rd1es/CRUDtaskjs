@@ -1,22 +1,27 @@
 import { Router } from "express";
 import OrderController from "../controllers/order.controller";
+import { validateRequest } from "../middleware/requestValidation";
+import { orderSchema, orderIdSchema } from "../validationSchemas/orderSchema";
 
 const router = Router();
 
-router.post("/", (req, res, next) =>
-  OrderController.createOrder(req, res, next)
+router.post("/", validateRequest(orderSchema), OrderController.createOrder);
+router.get("/", OrderController.getAllOrders);
+router.get(
+  "/:orderId",
+  validateRequest(orderIdSchema, "params"),
+  OrderController.getOrderById
 );
-router.get("/", (req, res, next) =>
-  OrderController.getAllOrders(req, res, next)
+router.put(
+  "/:orderId",
+  validateRequest(orderSchema),
+  validateRequest(orderIdSchema, "params"),
+  OrderController.updateOrder
 );
-router.get("/:id", (req, res, next) =>
-  OrderController.getOrderById(req, res, next)
-);
-router.put("/:id", (req, res, next) =>
-  OrderController.updateOrder(req, res, next)
-);
-router.delete("/:id", (req, res, next) =>
-  OrderController.deleteOrder(req, res, next)
+router.delete(
+  "/:orderId",
+  validateRequest(orderIdSchema, "params"),
+  OrderController.deleteOrder
 );
 
 export default router;

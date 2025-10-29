@@ -1,18 +1,27 @@
 import { Router } from "express";
 import UserController from "../controllers/user.controller";
+import { validateRequest } from "../middleware/requestValidation";
+import { userSchema, userIdSchema } from "../validationSchemas/userSchema";
 
 const router = Router();
 
-router.post("/", (req, res, next) => UserController.createUser(req, res, next));
-router.get("/", (req, res, next) => UserController.getAllUsers(req, res, next));
-router.get("/:id", (req, res, next) =>
-  UserController.getUserById(req, res, next)
+router.post("/", validateRequest(userSchema), UserController.createUser);
+router.get("/", UserController.getAllUsers);
+router.get(
+  "/:userId",
+  validateRequest(userIdSchema, "params"),
+  UserController.getUserById
 );
-router.put("/:id", (req, res, next) =>
-  UserController.updateUser(req, res, next)
+router.put(
+  "/:userId",
+  validateRequest(userSchema),
+  validateRequest(userIdSchema, "params"),
+  UserController.updateUser
 );
-router.delete("/:id", (req, res, next) =>
-  UserController.deleteUser(req, res, next)
+router.delete(
+  "/:userId",
+  validateRequest(userIdSchema, "params"),
+  UserController.deleteUser
 );
 
 export default router;

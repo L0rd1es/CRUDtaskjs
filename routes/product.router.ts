@@ -1,22 +1,34 @@
 import { Router } from "express";
 import ProductController from "../controllers/product.controller";
+import { validateRequest } from "../middleware/requestValidation";
+import {
+  productSchema,
+  productIdSchema,
+} from "../validationSchemas/productSchema";
 
 const router = Router();
 
-router.post("/", (req, res, next) =>
-  ProductController.createProduct(req, res, next)
+router.post(
+  "/",
+  validateRequest(productSchema),
+  ProductController.createProduct
 );
-router.get("/", (req, res, next) =>
-  ProductController.getAllProducts(req, res, next)
+router.get("/", ProductController.getAllProducts);
+router.get(
+  "/:productId",
+  validateRequest(productIdSchema, "params"),
+  ProductController.getProductById
 );
-router.get("/:id", (req, res, next) =>
-  ProductController.getProductById(req, res, next)
+router.put(
+  "/:productId",
+  validateRequest(productSchema),
+  validateRequest(productIdSchema, "params"),
+  ProductController.updateProduct
 );
-router.put("/:id", (req, res, next) =>
-  ProductController.updateProduct(req, res, next)
-);
-router.delete("/:id", (req, res, next) =>
-  ProductController.deleteProduct(req, res, next)
+router.delete(
+  "/:productId",
+  validateRequest(productIdSchema, "params"),
+  ProductController.deleteProduct
 );
 
 export default router;
