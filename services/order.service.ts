@@ -15,10 +15,6 @@ class OrderService {
     return await OrderRepository.getOrderById(orderId);
   }
 
-  async updateOrder(orderId: number, dto: orderDTO) {
-    return await OrderRepository.updateOrder(orderId, dto);
-  }
-
   async deleteOrder(orderId: number) {
     return await OrderRepository.deleteOrder(orderId);
   }

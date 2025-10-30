@@ -1,5 +1,6 @@
 import db from "../db";
 import { orderDTO } from "../DTO/order.dto";
+import { AppError, AppErrorType } from "../errors/appError";
 
 class OrderRepository {
   async createOrder(dto: orderDTO) {
@@ -8,33 +9,31 @@ class OrderRepository {
       await client.query("BEGIN");
 
       const order = await client.query(
-        "INSERT INTO orders (user_id) VALUES($1) RETURNING *",
+        "INSERT INTO orders (user_id) VALUES($1) RETURNING id",
         [dto.userId]
       );
+      console.log(order);
       const orderId = order.rows[0].id;
+      const productIds = dto.products.map((product) => product.productId);
+
+      const productPrices = await client.query(
+        `
+        SELECT price FROM products WHERE id = ANY($1)
+        `,
+        [productIds]
+      );
+
+      const products = dto.products.map(
+        (product, index) =>
+          `(${orderId}, ${product.productId}, ${product.quantity}, ${productPrices.rows[index].price})`
+      );
 
       const orderItems = await client.query(
         `
-        WITH input_data AS (
-          SELECT
-            $1::bigint AS order_id,
-            $2::jsonb AS products_json
-        )
         INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-        SELECT
-          input_data.order_id,
-          product_row."productId",
-          product_row.quantity,
-          products.price AS unit_price
-        FROM input_data
-        CROSS JOIN LATERAL jsonb_to_recordset(input_data.products_json) AS product_row(
-          "productId" bigint,
-          quantity int
-        )
-        JOIN products ON products.id = product_row."productId"
-        RETURNING product_id AS "productId", quantity, unit_price AS "unitPrice"
-        `,
-        [orderId, JSON.stringify(dto.products)]
+        VALUES ${products}
+        RETURNING product_id, quantity, unit_price
+        `
       );
 
       await client.query("COMMIT");
@@ -54,24 +53,26 @@ class OrderRepository {
   async getAllOrders() {
     const orders = await db.query(
       `
-      SELECT
-        orders.id AS "orderId",
-        orders.user_id AS "userId",
-        orders.created_at AS "createdAt",
-        json_agg(
-          json_build_object(
-            'productId', order_items.product_id,
+      SELECT 
+        orders.id, 
+        orders.user_id, 
+        orders.created_at,  
+        JSON_AGG(
+          JSON_BUILD_OBJECT(
+            'product_id', order_items.product_id,
             'quantity', order_items.quantity,
-            'unitPrice', order_items.unit_price
+            'unit_price', order_items.unit_price
           )
-          ORDER BY order_items.id
         ) AS products
       FROM orders
       JOIN order_items ON orders.id = order_items.order_id
       GROUP BY orders.id, orders.user_id, orders.created_at
-      ORDER BY orders.created_at DESC;
       `
     );
+
+    if (orders.rowCount === 0) {
+      throw new AppError(AppErrorType.NOT_FOUND, `No orders found`, 404);
+    }
 
     return orders.rows;
   }
@@ -80,16 +81,15 @@ class OrderRepository {
     const order = await db.query(
       `
       SELECT
-        orders.id AS "orderId",
-        orders.user_id AS "userId",
-        orders.created_at AS "createdAt",
-        json_agg(
-          json_build_object(
+        orders.id,
+        orders.user_id,
+        orders.created_at,
+        JSON_AGG(
+          JSON_BUILD_OBJECT(
             'productId', order_items.product_id,
             'quantity', order_items.quantity,
             'unitPrice', order_items.unit_price
           )
-          ORDER BY order_items.id
         ) AS products
       FROM orders
       JOIN order_items ON orders.id = order_items.order_id
@@ -98,58 +98,16 @@ class OrderRepository {
       `,
       [orderId]
     );
-    return order.rows[0];
-  }
 
-  //TODO update вместо delete+insert, переписать самому sql запрос,
-  //TODO update вместо delete+insert, переписать самому sql запрос,
-
-  async updateOrder(orderId: number, dto: orderDTO) {
-    const client = await db.connect();
-
-    try {
-      await client.query("BEGIN");
-
-      await client.query(`DELETE FROM order_items WHERE order_id = $1`, [
-        orderId,
-      ]);
-
-      const orderItems = await client.query(
-        `
-        WITH input_data AS (
-          SELECT
-            $1::bigint AS order_id,
-            $2::jsonb AS products_json
-        )
-        INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-        SELECT
-          input_data.order_id,
-          product_row."productId",
-          product_row.quantity,
-          products.price AS unit_price
-        FROM input_data
-        CROSS JOIN LATERAL jsonb_to_recordset(input_data.products_json) AS product_row(
-          "productId" bigint,
-          quantity int
-        )
-        JOIN products ON products.id = product_row."productId"
-        RETURNING product_id AS "productId", quantity, unit_price AS "unitPrice"
-        `,
-        [orderId, JSON.stringify(dto.products)]
+    if (order.rowCount === 0) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `Order with id:${orderId} not found`,
+        404
       );
-
-      await client.query("COMMIT");
-
-      return {
-        orderId: orderId,
-        products: orderItems.rows,
-      };
-    } catch (err: any) {
-      await client.query("ROLLBACK");
-      throw new Error(err);
-    } finally {
-      client.release();
     }
+
+    return order.rows[0];
   }
 
   async deleteOrder(orderId: number) {

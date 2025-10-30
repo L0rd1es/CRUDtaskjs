@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import ProductService from "../services/product.service";
-import { AppError, AppErrorType } from "../errors/appError";
 import { productDTO } from "../DTO/product.dto";
 
 class ProductController {
@@ -21,15 +20,6 @@ class ProductController {
     const product = await ProductService.getProductById(
       Number(req.params.productId)
     );
-
-    if (!product) {
-      throw new AppError(
-        AppErrorType.NOT_FOUND,
-        `Product with Id:${req.params.productId} not found`,
-        404
-      );
-    }
-
     res.status(200).json(product);
   };
 
@@ -37,17 +27,10 @@ class ProductController {
     req: Request<{ productId: string }, {}, productDTO>,
     res: Response
   ) => {
-    const productId = Number(req.params.productId);
-
-    if (!(await ProductService.getProductById(productId))) {
-      throw new AppError(
-        AppErrorType.NOT_FOUND,
-        `Product with Id:${req.params.productId} not found`,
-        404
-      );
-    }
-
-    const product = await ProductService.updateProduct(productId, req.body);
+    const product = await ProductService.updateProduct(
+      Number(req.params.productId),
+      req.body
+    );
     res.status(200).json(product);
   };
 
@@ -55,18 +38,7 @@ class ProductController {
     req: Request<{ productId: string }>,
     res: Response
   ) => {
-    const productId = Number(req.params.productId);
-
-    if (!(await ProductService.getProductById(productId))) {
-      throw new AppError(
-        AppErrorType.NOT_FOUND,
-        `Product with Id:${req.params.productId} not found`,
-        404
-      );
-    }
-
-    await ProductService.deleteProduct(productId);
-
+    await ProductService.deleteProduct(Number(req.params.productId));
     res.status(204).send();
   };
 }

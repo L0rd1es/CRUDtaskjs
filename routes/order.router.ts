@@ -12,12 +12,6 @@ router.get(
   validateRequest(orderIdSchema, "params"),
   OrderController.getOrderById
 );
-router.put(
-  "/:orderId",
-  validateRequest(orderSchema),
-  validateRequest(orderIdSchema, "params"),
-  OrderController.updateOrder
-);
 router.delete(
   "/:orderId",
   validateRequest(orderIdSchema, "params"),
