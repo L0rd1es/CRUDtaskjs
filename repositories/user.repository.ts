@@ -1,5 +1,6 @@
 import db from "../db";
 import { userDTO } from "../DTO/user.dto";
+import { AppError, AppErrorType } from "../errors/appError";
 
 class UserRepository {
   async createUser(dto: userDTO) {
@@ -17,6 +18,15 @@ class UserRepository {
 
   async getUserById(userId: number) {
     const user = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
+
+    if (user.rowCount === 0) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `User with id:${userId} not found`,
+        404
+      );
+    }
+
     return user.rows[0];
   }
 
@@ -25,6 +35,15 @@ class UserRepository {
       "UPDATE users SET name = $1, surname = $2 WHERE id = $3 RETURNING *",
       [dto.name, dto.surname, userId]
     );
+
+    if (user.rowCount === 0) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        `User with id:${userId} not found`,
+        404
+      );
+    }
+
     return user.rows[0];
   }
 
