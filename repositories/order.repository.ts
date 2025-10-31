@@ -12,7 +12,7 @@ class OrderRepository {
         "INSERT INTO orders (user_id) VALUES($1) RETURNING id",
         [dto.userId]
       );
-      console.log(order);
+
       const orderId = order.rows[0].id;
       const productIds = dto.products.map((product) => product.productId);
 
@@ -69,11 +69,6 @@ class OrderRepository {
       GROUP BY orders.id, orders.user_id, orders.created_at
       `
     );
-
-    if (orders.rowCount === 0) {
-      throw new AppError(AppErrorType.NOT_FOUND, `No orders found`, 404);
-    }
-
     return orders.rows;
   }
 

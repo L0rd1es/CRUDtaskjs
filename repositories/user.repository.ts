@@ -13,11 +13,6 @@ class UserRepository {
 
   async getAllUsers() {
     const users = await db.query("SELECT * FROM users");
-
-    if (users.rowCount === 0) {
-      throw new AppError(AppErrorType.NOT_FOUND, `No users found`, 404);
-    }
-
     return users.rows;
   }
 

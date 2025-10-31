@@ -13,11 +13,6 @@ class ProductRepository {
 
   async getAllProducts() {
     const products = await db.query("SELECT * FROM products");
-
-    if (products.rowCount === 0) {
-      throw new AppError(AppErrorType.NOT_FOUND, `No products found`, 404);
-    }
-
     return products.rows;
   }
 
